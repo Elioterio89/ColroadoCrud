@@ -1,0 +1,64 @@
+﻿@model TipoTelefoneModel
+
+@{
+    ViewData["Title"] = "Excluir Tipo de Telefone";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="deleteForm" class="form-horizontal">
+    <input type="hidden" id="CodigoTipoTelefone" value="@Model.CodigoTipoTelefone" />
+
+    <div class="form-group">
+        <label asp-for="DescricaoTipoTelefone" class="control-label col-md-2">Descrição</label>
+        <div class="col-md-10">
+            <input asp-for="DescricaoTipoTelefone" class="form-control" disabled />
+            <span asp-validation-for="DescricaoTipoTelefone" class="text-danger"></span>
+        </div>
+    </div>
+
+    <p>Tem certeza que deseja excluir este Tipo de Telefone?</p>
+
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-danger">Excluir</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#deleteForm").submit(function (event) {
+                event.preventDefault();
+                var codigoTipoTelefone = $("#CodigoTipoTelefone").val();
+
+             
+                var token = localStorage.getItem('jwt'); 
+
+                if (!token) {
+                    alert('Token não encontrado! Redirecionando para a página de login.');
+                    window.location.href = '/Autenticacao/Login'; 
+                    return;
+                }
+
+                $.ajax({
+                    url: 'https://localhost:5001/api/TipoTelefone/' + codigoTipoTelefone, 
+                    type: 'DELETE', 
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function (response) {
+                     
+                        alert('Tipo de Telefone excluído com sucesso!');
+                        window.location.href = '@Url.Action("Index", "TiposTelefone")'; 
+                    },
+                    error: function (xhr) {
+                     
+                        alert('Erro ao excluir Tipo de Telefone: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

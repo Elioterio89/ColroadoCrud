@@ -1,0 +1,64 @@
+﻿@model ColoradoCrud.Web.Models.LoginModel
+
+@{
+    ViewBag.Title = "Login";
+}
+
+<h2>Login</h2>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
+<form id="loginForm" method="post" asp-action="Login">
+    <div class="form-group">
+        <label for="username">Usuário:</label>
+        <input value="@Model?.Username" type="text" id="username" name="Username" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="password">Senha:</label>
+        <input value="@Model?.Password" type="password" id="password" name="Password" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Entrar</button>
+        <a href="/Autenticacao/Registrar" class="btn btn-secondary">Registrar</a>
+    </div>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $("#loginForm").submit(function (e) {
+        e.preventDefault();
+
+        var data = {
+            Username: $('#username').val(),
+            Password: $('#password').val()
+        };
+
+        $.ajax({
+            url: '/Autenticacao/Login',
+            type: 'POST',
+            data: $.param(data),
+            contentType: 'application/x-www-form-urlencoded',
+            success: function (response) {
+                if (response.success) {
+                    // Não é mais necessário usar localStorage, o token JWT está armazenado no cookie
+                    localStorage.setItem('jwt', response.token);
+                    window.location.href = response.redirectUrl;
+                } else {
+                    alert('Login falhou: ' + response.message);
+                }
+            },
+            error: function () {
+                alert('Erro ao processar o login.');
+            }
+        });
+    });
+
+
+</script>

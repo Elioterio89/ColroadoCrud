@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Bem-Vindo</h1>
+    <p>Inicio Colorado CRUD</p>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <p>Olá,<b>@User.Identity.Name</b> ! Você está autenticado.</p>
+    }
+  
+</div>

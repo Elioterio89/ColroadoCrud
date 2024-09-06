@@ -1,0 +1,61 @@
+﻿@model TelefoneModel
+
+<h2>Excluir Telefone</h2>
+
+<form id="deleteForm" class="form-horizontal">
+    <input type="hidden" id="NumeroTelefone" value="@Model.NumeroTelefone" />
+
+    <div class="form-group">
+        <p><strong>Número:</strong> @Model.NumeroTelefone</p>
+        <p><strong>Tipo:</strong> @Model.DescricaoTipoTelefone</p>
+        <p><strong>Operadora:</strong> @Model.Operadora</p>
+        <p><strong>Ativo:</strong> @(Model.Ativo ? "Sim" : "Não")</p>
+    </div>
+
+    <p>Tem certeza que deseja excluir este Telefone?</p>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#deleteForm").submit(function (event) {
+                event.preventDefault(); 
+
+              
+                var numeroTelefone = $("#NumeroTelefone").val();
+
+              
+                var token = localStorage.getItem('jwt'); 
+
+                if (!token) {
+                    alert('Token não encontrado! Redirecionando para a página de login.');
+                    window.location.href = '/Autenticacao/Login'; 
+                    return;
+                }
+
+             
+                $.ajax({
+                    url: 'https://localhost:5001/api/Telefone/' + numeroTelefone, 
+                    type: 'DELETE', 
+                    headers: {
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    success: function (response) {
+                       
+                        alert('Telefone excluído com sucesso!');
+                        window.location.href = '@Url.Action("Index", "Telefones")'; 
+                    },
+                    error: function (xhr) {
+                      
+                        alert('Erro ao excluir Telefone: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

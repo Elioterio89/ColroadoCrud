@@ -1,0 +1,6 @@
+@ColoradoCrud.Api_HostAddress = http://localhost:5201
+
+GET {{ColoradoCrud.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

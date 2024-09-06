@@ -1,0 +1,55 @@
+﻿@model IEnumerable<TipoTelefoneModel>
+
+<h2>Tipos de Telefone</h2>
+
+<table id="tipoTelefoneTable" class="table">
+    <thead>
+        <tr>
+            <th>Descrição</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-success">Novo Tipo de Telefone</a>
+
+@section Scripts {
+    <script>
+
+        $(document).ready(function () {
+         
+            var token = localStorage.getItem('jwt');
+          
+        
+            if (!token) {
+                window.location.href = '/Autenticacao/Login'; 
+            } else {
+              
+                $.ajax({
+                    url: 'https://localhost:5001/api/TipoTelefone', 
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function (data) {
+                     
+                        var tableBody = $('#tipoTelefoneTable tbody');
+                        tableBody.empty();
+
+                        $.each(data, function (index, tipoTelefone) {
+                            tableBody.append('<tr><td>' + tipoTelefone.descricaoTipoTelefone + '</td>' +
+                                '<td><a href="/TiposTelefone/Edit/' + tipoTelefone.codigoTipoTelefone + '" class="btn btn-warning">Editar</a>' +
+                                ' <a href="/TiposTelefone/Delete/' + tipoTelefone.codigoTipoTelefone + '" class="btn btn-danger">Excluir</a></td></tr>');
+                        });
+                    },
+                    error: function (xhr) {
+                     
+                        alert('Erro ao buscar tipos de telefone: ' + xhr.responseText);
+                    }
+                });
+            }
+         });
+    </script>
+}

@@ -1,0 +1,58 @@
+﻿@model IEnumerable<ClienteModel>
+
+<h2>Clientes</h2>
+
+<table id="clienteTable" class="table">
+    <thead>
+        <tr>
+            <th>Razão Social</th>
+            <th>Nome Fantasia</th>
+            <th>Documento</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+       
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-success">Novo Cliente</a>
+
+@section Scripts {
+    <script>
+
+        $(document).ready(function () {
+           
+            var token = localStorage.getItem('jwt')
+
+       
+            if (!token) {
+                window.location.href = '/Autenticacao/Login';
+            } else {
+                $.ajax({
+                    url: 'https://localhost:5001/api/Cliente',
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    success: function (data) {
+                        var tableBody = $('#clienteTable tbody');
+                        tableBody.empty(); 
+
+                        $.each(data, function (index, cliente) {
+                            tableBody.append('<tr><td>' + cliente.razaoSocial + '</td>' +
+                                '<td>' + cliente.nomeFantasia + '</td>' +
+                                '<td>' + cliente.documento + '</td>' +
+                                '<td><a href="/Clientes/Edit/' + cliente.codigoCliente + '" class="btn btn-warning">Editar</a>' +
+                                ' <a href="/Clientes/Delete/' + cliente.codigoCliente + '" class="btn btn-danger">Excluir</a></td></tr>');
+                        });
+                    },
+                    error: function (xhr) {
+                       
+                        alert('Erro ao buscar clientes: ' + xhr.responseText);
+                    }
+                });
+            }
+         });
+    </script>
+}

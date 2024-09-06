@@ -1,0 +1,54 @@
+﻿@model IEnumerable<TelefoneModel>
+
+<h2>Telefones</h2>
+
+<table id="telefoneTable" class="table">
+    <thead>
+        <tr>
+            <th>Número Telefone</th>
+            <th>Operadora</th>
+            <th>Ativo</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-success">Novo Telefone</a>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var token = localStorage.getItem('jwt');
+
+            if (!token) {
+                window.location.href = '/Autenticacao/Login'; 
+            } else {
+                $.ajax({
+                    url: 'https://localhost:5001/api/Telefone', 
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    success: function (data) {
+                        var tableBody = $('#telefoneTable tbody');
+                        tableBody.empty(); 
+
+                        $.each(data, function (index, telefone) {
+                            tableBody.append('<tr><td>' + telefone.numeroTelefone + '</td>' +
+                                '<td>' + telefone.operadora + '</td>' +
+                                '<td>' + (telefone.ativo ? "Sim" : "Não") + '</td>' +
+                                '<td><a href="/Telefones/Edit/' + telefone.numeroTelefone + '" class="btn btn-warning">Editar</a>' +
+                                ' <a href="/Telefones/Delete/' + telefone.numeroTelefone + '" class="btn btn-danger">Excluir</a></td></tr>');
+                        });
+                    },
+                    error: function (xhr) {
+                       
+                        alert('Erro ao buscar telefones: ' + xhr.responseText);
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,87 @@
+﻿@model TipoTelefoneModel
+
+@{
+    ViewData["Title"] = "Editar Tipo de Telefone";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="editForm" class="form-horizontal">
+    <input type="hidden" id="CodigoTipoTelefone" value="@Model.CodigoTipoTelefone" />
+
+    <div class="form-group">
+        <label asp-for="DescricaoTipoTelefone" class="control-label col-md-2">Descrição</label>
+        <div class="col-md-10">
+            <input asp-for="DescricaoTipoTelefone" class="form-control" />
+            <span asp-validation-for="DescricaoTipoTelefone" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Voltar para a lista</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#editForm").submit(function (event) {
+                
+                event.preventDefault(); 
+
+               
+                var descricaoTipoTelefone = $("#DescricaoTipoTelefone").val();
+                var codigoTipoTelefone = $("#CodigoTipoTelefone").val();
+
+            
+                var usuarioAtualizacao = '@User.Identity.Name';
+
+
+                var dataInsercao = new Date().toISOString();
+
+             
+                var tipoTelefone = {
+                    CodigoTipoTelefone: codigoTipoTelefone,
+                    DescricaoTipoTelefone: descricaoTipoTelefone,
+                    DataInsercao: dataInsercao,
+                    UsuarioInsercao: usuarioAtualizacao
+                };
+
+              
+                var token = localStorage.getItem('jwt');
+
+                if (!token) {
+                    alert('Token não encontrado! Redirecionando para a página de login.');
+                    window.location.href = '/Autenticacao/Login'; 
+                    return;
+                }
+
+              
+                $.ajax({
+                    url: 'https://localhost:5001/api/TipoTelefone/' + codigoTipoTelefone,
+                    type: 'PUT', 
+                    contentType: 'application/json',
+                    data: JSON.stringify(tipoTelefone),
+                    headers: {
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    success: function (response) {
+                      
+                        alert('Tipo de Telefone atualizado com sucesso!');
+                        window.location.href = '@Url.Action("Index", "TiposTelefone")'; 
+                    },
+                    error: function (xhr) {
+                      
+                        alert('Erro ao atualizar Tipo de Telefone: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

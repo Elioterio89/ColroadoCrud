@@ -1,0 +1,135 @@
+﻿@model TelefoneModel
+
+<h2>Editar Telefone</h2>
+
+<form id="editForm" class="form-horizontal">
+    <input type="hidden" id="CodigoCliente" value="@Model.CodigoCliente" />
+    <input type="hidden" id="NumeroTelefone" value="@Model.NumeroTelefone" />
+
+    <div class="form-group">
+        <label for="Cliente">Cliente:</label>
+        <span id="ClienteNome">@Model.NomeCliente</span>
+        <input type="hidden" id="CodigoCliente" value="@Model.CodigoCliente" />
+        <span asp-validation-for="CodigoCliente" class="text-danger"></span>
+    </div>
+
+        <div class="form-group">
+        <label for="Cliente">Numero:</label>
+        <span id="NumeroTelefone">@Model.NumeroTelefone</span>
+        <input type="hidden" id="CodigoCliente" value="@Model.NumeroTelefone" />
+        <span asp-validation-for="NumeroTelefone" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="CodigoTipoTelefone">Tipo de Telefone</label>
+        <select class="form-control" id="CodigoTipoTelefone" required>
+        </select>
+        <span asp-validation-for="CodigoTipoTelefone" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Operadora">Operadora</label>
+        <input type="text" class="form-control" id="Operadora" value="@Model.Operadora" />
+        <span asp-validation-for="Operadora" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Ativo">Ativo</label>
+        <div>
+            <label class="checkbox-inline">
+                <input type="checkbox" id="Ativo" @if (Model.Ativo)
+                {
+                    <text>checked="checked"</text>
+                } /> Ativo
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: 'https://localhost:5001/api/TipoTelefone', 
+                type: 'GET',
+                success: function (data) {
+                    var tipoTelefoneSelect = $('#CodigoTipoTelefone');
+                    tipoTelefoneSelect.empty(); 
+                    tipoTelefoneSelect.append('<option value="">Selecione um tipo de telefone</option>'); 
+
+                  
+                    $.each(data, function (index, tipoTelefone) {
+                        tipoTelefoneSelect.append('<option value="' + tipoTelefone.codigoTipoTelefone + '">' + tipoTelefone.descricaoTipoTelefone + '</option>');
+                    });
+
+                   
+                    tipoTelefoneSelect.val('@Model.CodigoTipoTelefone');
+                },
+                error: function (xhr) {
+                    alert('Erro ao buscar tipos de telefone: ' + xhr.responseText);
+                }
+            });
+
+          
+            $("#editForm").submit(function (event) {
+                event.preventDefault(); 
+
+            
+                var numeroTelefone = $("#NumeroTelefone").val();
+                var codigoCliente = $("#CodigoCliente").val(); 
+                var codigoTipoTelefone = $("#CodigoTipoTelefone").val();
+                var operadora = $("#Operadora").val();
+                var ativo = $("#Ativo").is(':checked');
+
+                
+                var usuarioAtualizacao = '@User.Identity.Name';
+
+             
+                var dataAtualizacao = new Date().toISOString(); 
+
+               
+                var telefone = {
+                    NumeroTelefone: numeroTelefone,
+                    CodigoCliente: codigoCliente,
+                    CodigoTipoTelefone: codigoTipoTelefone,
+                    Operadora: operadora,
+                    Ativo: ativo,
+                    DataInsercao: dataAtualizacao,
+                    UsuarioInsercao: usuarioAtualizacao
+                };
+
+              
+                var token = localStorage.getItem('jwt');
+
+                if (!token) {
+                    alert('Token não encontrado! Redirecionando para a página de login.');
+                    window.location.href = '/Autenticacao/Login'; 
+                    return;
+                }
+
+                $.ajax({
+                    url: 'https://localhost:5001/api/Telefone/' + numeroTelefone,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(telefone), 
+                    headers: {
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    success: function (response) {
+                        alert('Telefone atualizado com sucesso!');
+                        window.location.href = '@Url.Action("Index", "Telefones")'; 
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseText)
+                        alert('Erro ao atualizar Telefone: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

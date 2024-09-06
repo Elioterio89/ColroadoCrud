@@ -1,0 +1,177 @@
+﻿@model TelefoneModel
+
+@{
+    ViewData["Title"] = "Criar Telefone";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="createForm" class="form-horizontal" style="display: none;">
+    <div class="form-group">
+        <label for="CodigoCliente">Cliente</label>
+        <select class="form-control" id="CodigoCliente" style="width: 100%;" required>
+            <option value="">Selecione um cliente</option>
+        </select>
+        <span asp-validation-for="CodigoCliente" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="NumeroTelefone">Número do Telefone</label>
+        <input type="text" class="form-control" id="NumeroTelefone" required />
+        <span asp-validation-for="NumeroTelefone" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="CodigoTipoTelefone">Tipo de Telefone</label>
+        <select class="form-control" id="CodigoTipoTelefone" required>
+            <option value="">Selecione um tipo de telefone</option>
+        </select>
+        <span asp-validation-for="CodigoTipoTelefone" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Operadora">Operadora</label>
+        <input type="text" class="form-control" id="Operadora" />
+        <span asp-validation-for="Operadora" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Ativo</label>
+        <div>
+            <label class="radio-inline">
+                <input type="radio" name="Ativo" value="true" checked /> Sim
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="Ativo" value="false" /> Não
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Voltar para a lista</a>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            $('#CodigoCliente').select2({
+                placeholder: "Selecione um cliente",
+                allowClear: true
+            });
+
+          
+            $.ajax({
+                url: 'https://localhost:5001/api/Cliente',
+                type: 'GET',
+                success: function (clientes) {
+                    if (clientes.length === 0) {
+                      
+                        alert('Nenhum cliente cadastrado! Redirecionando para criar um cliente.');
+                        window.location.href = '/Clientes/Create';
+                    } else {
+                       
+                        var clienteSelect = $('#CodigoCliente');
+                        clienteSelect.empty();
+                        clienteSelect.append('<option value="">Selecione um cliente</option>'); 
+
+                    
+                        $.each(clientes, function (index, cliente) {
+                            clienteSelect.append('<option value="' + cliente.codigoCliente + '">' + cliente.razaoSocial + '</option>');
+                        });
+
+                      
+                        $('#createForm').show();
+                    }
+                },
+                error: function (xhr) {
+                    alert( xhr.responseText);
+                }
+            });
+
+         
+            $.ajax({
+                url: 'https://localhost:5001/api/TipoTelefone', 
+                type: 'GET',
+                success: function (data) {
+                    var tipoTelefoneSelect = $('#CodigoTipoTelefone');
+                    tipoTelefoneSelect.empty();
+                    tipoTelefoneSelect.append('<option value="">Selecione um tipo de telefone</option>'); 
+
+                
+                    $.each(data, function (index, tipoTelefone) {
+                        tipoTelefoneSelect.append('<option value="' + tipoTelefone.codigoTipoTelefone + '">' + tipoTelefone.descricaoTipoTelefone + '</option>');
+                    });
+                },
+                error: function (xhr) {
+                    alert('Erro ao buscar tipos de telefone: ' + xhr.responseText);
+                }
+            });
+
+          
+            $("#createForm").submit(function (event) {
+                event.preventDefault();
+
+             
+                var codigoCliente = $("#CodigoCliente").val();
+                var numeroTelefone = $("#NumeroTelefone").val();
+                var CodigoTipoTelefone = $("#CodigoTipoTelefone").val();
+                var operadora = $("#Operadora").val();
+                var ativo = $('input[name="Ativo"]:checked').val(); 
+
+             
+                var usuarioInsercao = '@User.Identity.Name';
+
+              
+                var dataInsercao = new Date().toISOString(); 
+
+              
+                var telefone = {
+                    codigoCliente: codigoCliente,
+                    numeroTelefone: numeroTelefone,
+                    codigoTipoTelefone: CodigoTipoTelefone,
+                    operadora: operadora,
+                    ativo: ativo === "true", 
+                    dataInsercao: dataInsercao,
+                    usuarioInsercao: usuarioInsercao
+                };
+
+           
+                var token = localStorage.getItem('jwt');
+
+                if (!token) {
+                    alert('Token não encontrado! Redirecionando para a página de login.');
+                    window.location.href = '/Autenticacao/Login'; 
+                    return;
+                }
+
+             
+                $.ajax({
+                    url: 'https://localhost:5001/api/Telefone',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(telefone),
+                    headers: {
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    success: function (response) {
+                      
+                        alert('Telefone criado com sucesso!');
+                        window.location.href = '@Url.Action("Index", "Telefones")';
+                    },
+                    error: function (xhr) {
+                       console.log(xhr.responseText)
+                        alert('Erro ao criar Telefone: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

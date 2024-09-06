@@ -1,0 +1,58 @@
+﻿@model ClienteModel
+
+<h2>Confirmar Exclusão de Cliente</h2>
+
+<div>
+    <h4>Tem certeza de que deseja excluir este cliente?</h4>
+    <div>
+        <p><strong>Razão Social:</strong> @Model.RazaoSocial</p>
+        <p><strong>Nome Fantasia:</strong> @Model.NomeFantasia</p>
+        <p><strong>Documento:</strong> @Model.Documento</p>
+    </div>
+
+    <form id="deleteForm" class="form-horizontal">
+        <input type="hidden" id="CodigoCliente" value="@Model.CodigoCliente" />
+
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#deleteForm").submit(function (event) {
+                event.preventDefault(); 
+
+                var codigoCliente = $("#CodigoCliente").val();
+
+               
+                var token = localStorage.getItem('jwt');
+
+                if (!token) {
+                    alert('Token não encontrado! Redirecionando para a página de login.');
+                    window.location.href = '/Autenticacao/Login';
+                    return;
+                }
+
+               
+                $.ajax({
+                    url: 'https://localhost:5001/api/Cliente/' + codigoCliente,
+                    type: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    success: function (response) {
+                       
+                        alert('Cliente excluído com sucesso!');
+                        window.location.href = '@Url.Action("Index", "Clientes")';
+                    },
+                    error: function (xhr) {
+                     
+                        alert('Erro ao excluir Cliente: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,160 @@
+﻿@model ClienteModel
+
+<h2>Editar Cliente</h2>
+
+<form id="editForm" class="form-horizontal">
+    <input type="hidden" id="CodigoCliente" value="@Model.CodigoCliente" />
+
+    <div class="form-group">
+        <label for="RazaoSocial">Razão Social</label>
+        <input type="text" class="form-control" id="RazaoSocial" value="@Model.RazaoSocial" required />
+    </div>
+
+    <div class="form-group">
+        <label for="NomeFantasia">Nome Fantasia</label>
+        <input type="text" class="form-control" id="NomeFantasia" value="@Model.NomeFantasia" required />
+    </div>
+  
+    <div class="form-group">
+        <label for="TipoPessoa">Tipo de Pessoa</label>
+        <select class="form-control" id="TipoPessoa" required>
+            <option value="">Selecione o tipo de pessoa</option>
+            @foreach (var tipo in ViewBag.TipoPessoas)
+            {
+                if (Model.TipoPessoa == tipo)
+                {
+                    <option value="@tipo" selected>@tipo</option>
+                }
+                else
+                {
+                    <option value="@tipo">@tipo</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="Documento">Documento</label>
+        <input type="text" class="form-control" id="Documento" value="@Model.Documento" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Endereco">Endereço</label>
+        <input type="text" class="form-control" id="Endereco" value="@Model.Endereco" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Complemento">Complemento</label>
+        <input type="text" class="form-control" id="Complemento" value="@Model.Complemento" />
+    </div>
+
+    <div class="form-group">
+        <label for="Bairro">Bairro</label>
+        <input type="text" class="form-control" id="Bairro" value="@Model.Bairro" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Cidade">Cidade</label>
+        <input type="text" class="form-control" id="Cidade" value="@Model.Cidade" required />
+    </div>
+
+    <div class="form-group">
+        <label for="CEP">CEP</label>
+        <input type="text" class="form-control" id="CEP" value="@Model.CEP" required />
+    </div>
+
+ 
+    <div class="form-group">
+        <label for="UF">UF</label>
+        <select class="form-control" id="UF" required>
+            <option value="">Selecione o estado (UF)</option>
+            @foreach (var uf in ViewBag.UFs)
+            {
+                if (Model.UF == uf)
+                {
+                    <option value="@uf" selected>@uf</option>
+                }
+                else
+                {
+                    <option value="@uf">@uf</option>
+                }
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+</form>
+
+<div>
+    <a asp-action="Index">Voltar para a lista</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+          
+            $("#editForm").submit(function (event) {
+                event.preventDefault(); 
+
+                var codigoCliente = $("#CodigoCliente").val();
+                var razaoSocial = $("#RazaoSocial").val();
+                var nomeFantasia = $("#NomeFantasia").val();
+                var tipoPessoa = $("#TipoPessoa").val();
+                var documento = $("#Documento").val();
+                var endereco = $("#Endereco").val();
+                var complemento = $("#Complemento").val();
+                var bairro = $("#Bairro").val();
+                var cidade = $("#Cidade").val();
+                var cep = $("#CEP").val();
+                var uf = $("#UF").val();
+
+             
+                var UsuarioInsercao = '@User.Identity.Name';
+
+                var DatAtualziacao = new Date().toISOString();
+
+                var cliente = {
+                    CodigoCliente: codigoCliente,
+                    RazaoSocial: razaoSocial,
+                    NomeFantasia: nomeFantasia,
+                    TipoPessoa: tipoPessoa,
+                    Documento: documento,
+                    Endereco: endereco,
+                    Complemento: complemento,
+                    Bairro: bairro,
+                    Cidade: cidade,
+                    CEP: cep,
+                    UF: uf,
+                    UsuarioInsercao: UsuarioInsercao,
+                    DataInsercao: DatAtualziacao
+                };
+
+               
+                var token = localStorage.getItem('jwt'); 
+
+                if (!token) {
+                    alert('Token não encontrado! Redirecionando para a página de login.');
+                    window.location.href = '/Autenticacao/Login';
+                    return;
+                }
+
+                $.ajax({
+                    url: 'https://localhost:5001/api/Cliente/' + codigoCliente, 
+                    type: 'PUT', 
+                    contentType: 'application/json',
+                    data: JSON.stringify(cliente), 
+                    headers: {
+                        'Authorization': 'Bearer ' + token 
+                    },
+                    success: function (response) {
+                        alert('Cliente atualizado com sucesso!');
+                        window.location.href = '@Url.Action("Index", "Clientes")';
+                    },
+                    error: function (xhr) {
+                        alert('Erro ao atualizar Cliente: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}
